@@ -1,0 +1,11 @@
+steps:
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - artifacts
+      - repositories
+      - create
+      - rails7-sqlite3
+      - --location
+      - asia
+      - --repository-format
+      - docker
