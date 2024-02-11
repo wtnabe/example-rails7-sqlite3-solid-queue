@@ -36,7 +36,7 @@ module Rails71Ruby32
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    config.active_job.queue_adapter = :solid_queue
+    config.active_job.queue_adapter = :inline
     config.solid_queue.silence_polling = true
     
     # Don't generate system test files.
