@@ -15,29 +15,8 @@ steps:
       - -c
       - 'docker tag rails7-sqlite3-solid-queue asia-docker.pkg.dev/${PROJECT_ID}/rails7-sqlite3/solid-queue-app && docker push asia-docker.pkg.dev/${PROJECT_ID}/rails7-sqlite3/solid-queue-app'
   - name: gcr.io/cloud-builders/gcloud
-    id: deploy
-    waitFor: ['push-image']
-    args:
-      - alpha
-      - run
-      - deploy
-      - rails-solid-queue
-      - --allow-unauthenticated
-      - --execution-environment
-      - gen2
-      - --region
-      - asia-northeast1
-      - --execution-environment
-      - gen2
-      - --add-volume
-      - name=rails-sqlite3,type=cloud-storage,bucket=${PROJECT_ID}-fuse
-      - --add-volume-mount
-      - volume=rails-sqlite3,mount-path=/workspace/storage/sqlite3
-      - --image
-      - 'asia-docker.pkg.dev/${PROJECT_ID}/rails7-sqlite3/solid-queue-app'
-  - name: gcr.io/cloud-builders/gcloud
     id: migrate
-    waitFor: ['deploy']
+    waitFor: ['push-image']
     args:
       - alpha
       - run
@@ -48,10 +27,33 @@ steps:
       - migrate
       - --command
       - migrate
-      - --execute-now
       - --image
       - 'asia-docker.pkg.dev/${PROJECT_ID}/rails7-sqlite3/solid-queue-app'
+      - --add-volume
+      - name=rails-sqlite3,type=cloud-storage,bucket=${PROJECT_ID}-fuse
+      - --add-volume-mount
+      - volume=rails-sqlite3,mount-path=/workspace/storage
+      - --execute-now
       - --wait
+  - name: gcr.io/cloud-builders/gcloud
+    id: deploy
+    waitFor: ['migrate']
+    args:
+      - alpha
+      - run
+      - deploy
+      - rails-solid-queue
+      - --allow-unauthenticated
+      - --execution-environment
+      - gen2
+      - --region
+      - asia-northeast1
+      - --add-volume
+      - name=rails-sqlite3,type=cloud-storage,bucket=${PROJECT_ID}-fuse
+      - --add-volume-mount
+      - volume=rails-sqlite3,mount-path=/workspace/storage
+      - --image
+      - 'asia-docker.pkg.dev/${PROJECT_ID}/rails7-sqlite3/solid-queue-app'
 
 images:
   - 'asia-docker.pkg.dev/${PROJECT_ID}/rails7-sqlite3/solid-queue-app'
